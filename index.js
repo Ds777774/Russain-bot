@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 });
 
 // Start Express server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -76,91 +76,6 @@ client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
-// Event listener for messages
-client.on('messageCreate', async (message) => {
-  if (message.content.toLowerCase() === '!start') {
-    if (quizInProgress) {
-      return message.reply('A quiz is already in progress. Please wait until it finishes.');
-    }
-
-    quizInProgress = true;
-
-    shuffleArray(words); // Shuffle questions
-    const selectedWords = words.slice(0, 5); // Select 5 random words
-    let score = 0;
-    let detailedResults = [];
-
-    for (let i = 0; i < selectedWords.length; i++) {
-      const currentWord = selectedWords[i];
-      const question = `What is the English meaning of the Russian word "${currentWord.word}"?`;
-
-      const quizMessage = await sendQuizMessage(message.channel, question, currentWord.options);
-
-      const filter = (reaction, user) =>
-        ['🇦', '🇧', '🇨', '🇩'].includes(reaction.emoji.name) && !user.bot;
-
-      try {
-        const collected = await quizMessage.awaitReactions({ filter, max: 1, time: 15000 });
-        const reaction = collected.first();
-
-        if (reaction) {
-          const userChoiceIndex = ['🇦', '🇧', '🇨', '🇩'].indexOf(reaction.emoji.name);
-          const userAnswer = currentWord.options[userChoiceIndex].split(': ')[1]; // Extract answer
-          const isCorrect = userAnswer === currentWord.meaning;
-
-          if (isCorrect) {
-            score++;
-          }
-
-          detailedResults.push({
-            word: currentWord.word,
-            userAnswer: userAnswer,
-            correct: currentWord.meaning,
-            isCorrect: isCorrect
-          });
-        } else {
-          detailedResults.push({
-            word: currentWord.word,
-            userAnswer: 'No reaction',
-            correct: currentWord.meaning,
-            isCorrect: false
-          });
-        }
-      } catch (error) {
-        console.error('Reaction collection failed:', error);
-        detailedResults.push({
-          word: currentWord.word,
-          userAnswer: 'No reaction',
-          correct: currentWord.meaning,
-          isCorrect: false
-        });
-      }
-
-      await quizMessage.delete();
-    }
-
-    quizInProgress = false;
-
-    const resultEmbed = new EmbedBuilder()
-      .setTitle('Quiz Results')
-      .setDescription(`You scored ${score} out of 5!`)
-      .setColor('#00FF00');
-
-    let resultsDetail = '';
-
-    detailedResults.forEach((result) => {
-      resultsDetail += `**Russian word:** "${result.word}"\n` +
-        `Your answer: ${result.userAnswer}\n` +
-        `Correct answer: ${result.correct}\n` +
-        `Result: ${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}\n\n`;
-    });
-
-    resultEmbed.addFields({ name: 'Detailed Results', value: resultsDetail });
-
-    await message.channel.send({ embeds: [resultEmbed] });
-  }
-});
-
 // Channel ID for Word of the Day
 const wordOfTheDayChannelId = '1303664003444379649';
 
@@ -180,8 +95,8 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-// Set up cron job to send Word of the Day at 16:30 IST daily
-cron.schedule('00 11 * * *', () => {
+// Set up cron job to send Word of the Day at 16:50 IST daily
+cron.schedule('20 11 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
