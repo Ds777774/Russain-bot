@@ -180,8 +180,8 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-// Set up cron job to send Word of the Day at 16:10 IST daily
-cron.schedule('40 10 * * *', () => {
+// Set up cron job to send Word of the Day at 16:14 IST daily
+cron.schedule('44 10 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
