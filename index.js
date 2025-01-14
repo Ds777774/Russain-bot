@@ -162,7 +162,7 @@ client.on('messageCreate', async (message) => {
 });
 
 // Channel ID for Word of the Day
-const wordOfTheDayChannelId = '1225363050207514675';
+const wordOfTheDayChannelId = '1303664003444379649';
 
 // Function to send the Word of the Day
 const sendWordOfTheDay = async () => {
@@ -174,14 +174,14 @@ const sendWordOfTheDay = async () => {
     .addFields(
       { name: 'Meaning', value: randomWord.meaning }
     )
-    .setColor('#FFA500') // Orange color
+    .setColor('#7907ff') // Purple color
     .setFooter({ text: 'Stay tuned for more words!' });
 
   await channel.send({ embeds: [embed] });
 };
 
-// Set up cron job to send Word of the Day at 12:00 IST daily
-cron.schedule('30 6 * * *', () => {
+// Set up cron job to send Word of the Day at 16:10 IST daily
+cron.schedule('40 10 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
