@@ -27,8 +27,8 @@ app.get('/', (req, res) => {
   res.send('Bot is running!');
 });
 
-// Start Express server
-const PORT = process.env.PORT || 10000;
+// Start Express server on port 3000
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -95,12 +95,27 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-// Set up cron job to send Word of the Day at 16:50 IST daily
-cron.schedule('20 11 * * *', () => {
+// Set up cron job to send Word of the Day at 17:30 IST daily
+cron.schedule('0 12 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
   timezone: "Asia/Kolkata"
+});
+
+// Command listener to trigger quiz
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return; // Ignore bot messages
+
+  // Listen for the quiz command
+  if (message.content.toLowerCase() === '!quiz' && !quizInProgress) {
+    quizInProgress = true;
+    const randomWord = words[Math.floor(Math.random() * words.length)];
+    const options = shuffleArray(randomWord.options);
+
+    await sendQuizMessage(message.channel, `What does the word **${randomWord.word}** mean?`, options);
+    message.reply('Quiz started! React with the emoji corresponding to your answer.');
+  }
 });
 
 // Log in to Discord with the bot token
