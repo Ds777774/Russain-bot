@@ -3,10 +3,10 @@ const express = require('express');
 const cron = require('node-cron');
 
 // Use environment variable for the bot token
-const TOKEN = process.env.BOT_TOKEN;
+const TOKEN = process.env.DISCORD_TOKEN;
 
 if (!TOKEN) {
-  console.error('Error: BOT_TOKEN environment variable is not set.');
+  console.error('Error: DISCORD_TOKEN environment variable is not set.');
   process.exit(1); // Exit the app if the token is missing
 }
 
@@ -79,7 +79,7 @@ client.once('ready', () => {
 
 // Event listener for messages
 client.on('messageCreate', async (message) => {
-  if (message.content.toLowerCase() === '!quiz') {
+  if (message.content.toLowerCase() === '!start') {
     if (quizInProgress) {
       return message.reply('A quiz is already in progress. Please wait until it finishes.');
     }
@@ -175,14 +175,14 @@ const sendWordOfTheDay = async () => {
     .addFields(
       { name: 'Meaning', value: randomWord.meaning }
     )
-    .setColor('#FFA500') // Orange color
+    .setColor('#7907ff') // Purple color
     .setFooter({ text: 'Stay tuned for more words!' });
 
   await channel.send({ embeds: [embed] });
 };
 
-// Set up cron job to send Word of the Day at 17:40 IST daily
-cron.schedule('40 17 * * *', () => {
+// Set up cron job to send Word of the Day at 12:30 PM IST daily
+cron.schedule('30 12 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
