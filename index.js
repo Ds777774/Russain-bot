@@ -3,10 +3,10 @@ const express = require('express');
 const cron = require('node-cron');
 
 // Use environment variable for the bot token
-const TOKEN = process.env.DISCORD_TOKEN;
+const TOKEN = process.env.BOT_TOKEN;
 
 if (!TOKEN) {
-  console.error('Error: DISCORD_TOKEN environment variable is not set.');
+  console.error('Error: BOT_TOKEN environment variable is not set.');
   process.exit(1); // Exit the app if the token is missing
 }
 
