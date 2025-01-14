@@ -3,7 +3,7 @@ const express = require('express');
 const cron = require('node-cron');
 
 // Use environment variable for the bot token
-const TOKEN = process.env.BOT_TOKEN;
+const TOKEN = process.env.DISCORD_TOKEN;
 
 if (!TOKEN) {
   console.error('Error: BOT_TOKEN environment variable is not set.');
@@ -27,19 +27,20 @@ app.get('/', (req, res) => {
   res.send('Bot is running!');
 });
 
-// Start Express server on port 3000
-const PORT = 3000;
+// Start Express server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
 // List of Russian words and their meanings
 const words = [
-  { word: 'яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
-  { word: 'дом', meaning: 'House', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇧' },
-  { word: 'кошка', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Cat', 'D: Dog'], correct: '🇨' },
-  { word: 'собака', meaning: 'Dog', options: ['A: Dog', 'B: Cat', 'C: Apple', 'D: House'], correct: '🇦' },
-  { word: 'книга', meaning: 'Book', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Pen'], correct: '🇦' }
+  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
+  { word: 'Дом', meaning: 'House', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇧' },
+  { word: 'Кошка', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Cat', 'D: Dog'], correct: '🇨' },
+  { word: 'Собака', meaning: 'Dog', options: ['A: Dog', 'B: Cat', 'C: Apple', 'D: House'], correct: '🇦' },
+  { word: 'Книга', meaning: 'Book', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Pen'], correct: '🇦' },
+  { word: 'Стол', meaning: 'Table', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Bed'], correct: '🇧' }
 ];
 
 // Shuffle array
@@ -76,6 +77,91 @@ client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
+// Event listener for messages
+client.on('messageCreate', async (message) => {
+  if (message.content.toLowerCase() === '!quiz') {
+    if (quizInProgress) {
+      return message.reply('A quiz is already in progress. Please wait until it finishes.');
+    }
+
+    quizInProgress = true;
+
+    shuffleArray(words); // Shuffle questions
+    const selectedWords = words.slice(0, 5); // Select 5 random words
+    let score = 0;
+    let detailedResults = [];
+
+    for (let i = 0; i < selectedWords.length; i++) {
+      const currentWord = selectedWords[i];
+      const question = `What is the English meaning of the Russian word "${currentWord.word}"?`;
+
+      const quizMessage = await sendQuizMessage(message.channel, question, currentWord.options);
+
+      const filter = (reaction, user) =>
+        ['🇦', '🇧', '🇨', '🇩'].includes(reaction.emoji.name) && !user.bot;
+
+      try {
+        const collected = await quizMessage.awaitReactions({ filter, max: 1, time: 15000 });
+        const reaction = collected.first();
+
+        if (reaction) {
+          const userChoiceIndex = ['🇦', '🇧', '🇨', '🇩'].indexOf(reaction.emoji.name);
+          const userAnswer = currentWord.options[userChoiceIndex].split(': ')[1]; // Extract answer
+          const isCorrect = userAnswer === currentWord.meaning;
+
+          if (isCorrect) {
+            score++;
+          }
+
+          detailedResults.push({
+            word: currentWord.word,
+            userAnswer: userAnswer,
+            correct: currentWord.meaning,
+            isCorrect: isCorrect
+          });
+        } else {
+          detailedResults.push({
+            word: currentWord.word,
+            userAnswer: 'No reaction',
+            correct: currentWord.meaning,
+            isCorrect: false
+          });
+        }
+      } catch (error) {
+        console.error('Reaction collection failed:', error);
+        detailedResults.push({
+          word: currentWord.word,
+          userAnswer: 'No reaction',
+          correct: currentWord.meaning,
+          isCorrect: false
+        });
+      }
+
+      await quizMessage.delete();
+    }
+
+    quizInProgress = false;
+
+    const resultEmbed = new EmbedBuilder()
+      .setTitle('Quiz Results')
+      .setDescription(`You scored ${score} out of 5!`)
+      .setColor('#00FF00');
+
+    let resultsDetail = '';
+
+    detailedResults.forEach((result) => {
+      resultsDetail += `**Russian word:** "${result.word}"\n` +
+        `Your answer: ${result.userAnswer}\n` +
+        `Correct answer: ${result.correct}\n` +
+        `Result: ${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}\n\n`;
+    });
+
+    resultEmbed.addFields({ name: 'Detailed Results', value: resultsDetail });
+
+    await message.channel.send({ embeds: [resultEmbed] });
+  }
+});
+
 // Channel ID for Word of the Day
 const wordOfTheDayChannelId = '1303664003444379649';
 
@@ -89,33 +175,18 @@ const sendWordOfTheDay = async () => {
     .addFields(
       { name: 'Meaning', value: randomWord.meaning }
     )
-    .setColor('#7907ff') // Purple color
+    .setColor('#FFA500') // Orange color
     .setFooter({ text: 'Stay tuned for more words!' });
 
   await channel.send({ embeds: [embed] });
 };
 
-// Set up cron job to send Word of the Day at 17:30 IST daily
-cron.schedule('0 12 * * *', () => {
+// Set up cron job to send Word of the Day at 17:40 IST daily
+cron.schedule('40 17 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
   timezone: "Asia/Kolkata"
-});
-
-// Command listener to trigger quiz
-client.on('messageCreate', async (message) => {
-  if (message.author.bot) return; // Ignore bot messages
-
-  // Listen for the quiz command
-  if (message.content.toLowerCase() === '!quiz' && !quizInProgress) {
-    quizInProgress = true;
-    const randomWord = words[Math.floor(Math.random() * words.length)];
-    const options = shuffleArray(randomWord.options);
-
-    await sendQuizMessage(message.channel, `What does the word **${randomWord.word}** mean?`, options);
-    message.reply('Quiz started! React with the emoji corresponding to your answer.');
-  }
 });
 
 // Log in to Discord with the bot token
