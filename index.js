@@ -40,7 +40,27 @@ const words = [
   { word: 'Кошка', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Cat', 'D: Dog'], correct: '🇨' },
   { word: 'Собака', meaning: 'Dog', options: ['A: Dog', 'B: Cat', 'C: Apple', 'D: House'], correct: '🇦' },
   { word: 'Книга', meaning: 'Book', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Pen'], correct: '🇦' },
-  { word: 'Стол', meaning: 'Table', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Bed'], correct: '🇧' }
+  { word: 'Стол', meaning: 'Table', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Bed'], correct: '🇧' },
+ { word: 'Солнце', meaning: 'Sun', options: ['A: Moon', 'B: Sun', 'C: Star', 'D: Cloud'], correct: '🇧' },
+  { word: 'Луна', meaning: 'Moon', options: ['A: Moon', 'B: Sun', 'C: Star', 'D: Sky'], correct: '🇦' },
+  { word: 'Звезда', meaning: 'Star', options: ['A: Star', 'B: Planet', 'C: Galaxy', 'D: Moon'], correct: '🇦' },
+  { word: 'Дерево', meaning: 'Tree', options: ['A: Flower', 'B: Plant', 'C: Tree', 'D: Grass'], correct: '🇨' },
+  { word: 'Река', meaning: 'River', options: ['A: Lake', 'B: River', 'C: Ocean', 'D: Pond'], correct: '🇧' },
+  { word: 'Озеро', meaning: 'Lake', options: ['A: River', 'B: Lake', 'C: Ocean', 'D: Sea'], correct: '🇧' },
+  { word: 'Гора', meaning: 'Mountain', options: ['A: Hill', 'B: Mountain', 'C: Valley', 'D: Forest'], correct: '🇧' },
+  { word: 'Лес', meaning: 'Forest', options: ['A: Forest', 'B: Desert', 'C: Grassland', 'D: Jungle'], correct: '🇦' },
+  { word: 'Птица', meaning: 'Bird', options: ['A: Bird', 'B: Fish', 'C: Mammal', 'D: Reptile'], correct: '🇦' },
+  { word: 'Рыба', meaning: 'Fish', options: ['A: Mammal', 'B: Fish', 'C: Reptile', 'D: Amphibian'], correct: '🇧' },
+  { word: 'Книга', meaning: 'Book', options: ['A: Book', 'B: Notebook', 'C: Diary', 'D: Journal'], correct: '🇦' },
+  { word: 'Письмо', meaning: 'Letter', options: ['A: Email', 'B: Letter', 'C: Note', 'D: Postcard'], correct: '🇧' },
+  { word: 'Стол', meaning: 'Table', options: ['A: Desk', 'B: Table', 'C: Chair', 'D: Bed'], correct: '🇧' },
+  { word: 'Стул', meaning: 'Chair', options: ['A: Chair', 'B: Table', 'C: Bench', 'D: Stool'], correct: '🇦' },
+  { word: 'Зеркало', meaning: 'Mirror', options: ['A: Glass', 'B: Mirror', 'C: Window', 'D: Frame'], correct: '🇧' },
+  { word: 'Окно', meaning: 'Window', options: ['A: Door', 'B: Window', 'C: Curtain', 'D: Roof'], correct: '🇧' },
+  { word: 'Дверь', meaning: 'Door', options: ['A: Window', 'B: Door', 'C: Wall', 'D: Gate'], correct: '🇧' },
+  { word: 'Кровать', meaning: 'Bed', options: ['A: Table', 'B: Chair', 'C: Bed', 'D: Sofa'], correct: '🇨' },
+  { word: 'Собака', meaning: 'Dog', options: ['A: Cat', 'B: Dog', 'C: Rabbit', 'D: Mouse'], correct: '🇧' },
+  { word: 'Кошка', meaning: 'Cat', options: ['A: Dog', 'B: Cat', 'C: Rabbit', 'D: Fox'], correct: '🇧' }
 ];
 
 // Shuffle array
