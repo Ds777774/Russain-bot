@@ -196,8 +196,8 @@ const sendWordOfTheDay = async () => {
   }
 };
 
-// Set up cron job to send Word of the Day at 12:40 PM IST daily
-cron.schedule('40 12 * * *', () => {
+// Set up cron job to send Word of the Day at 12:44 PM IST daily
+cron.schedule('44 12 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
