@@ -36,9 +36,16 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// List of Russian words and their meanings
+// List of Russian words and their meanings (added 4 more words)
 const words = [
-  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' }
+  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
+  { word: 'Дом', meaning: 'House', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇧' },
+  { word: 'Собака', meaning: 'Dog', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇨' },
+  { word: 'Кот', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇩' },
+  { word: 'Молоко', meaning: 'Milk', options: ['A: Apple', 'B: Milk', 'C: Dog', 'D: Cat'], correct: '🇧' },
+  { word: 'Лошадь', meaning: 'Horse', options: ['A: Horse', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
+  { word: 'Стол', meaning: 'Table', options: ['A: Table', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
+  { word: 'Книга', meaning: 'Book', options: ['A: Table', 'B: Book', 'C: Dog', 'D: Cat'], correct: '🇧' }
 ];
 
 // Shuffle array
@@ -196,8 +203,8 @@ const sendWordOfTheDay = async () => {
   }
 };
 
-// Set up cron job to send Word of the Day at 12:44 PM IST daily
-cron.schedule('44 12 * * *', () => {
+// Set up cron job to send Word of the Day at 12:56 PM IST daily
+cron.schedule('56 12 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
