@@ -36,16 +36,16 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// List of Russian words and their meanings (added 4 more words)
+// List of Russian words and their meanings
 const words = [
   { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
   { word: 'Дом', meaning: 'House', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇧' },
   { word: 'Собака', meaning: 'Dog', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇨' },
-  { word: 'Кот', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇩' },
-  { word: 'Молоко', meaning: 'Milk', options: ['A: Apple', 'B: Milk', 'C: Dog', 'D: Cat'], correct: '🇧' },
-  { word: 'Лошадь', meaning: 'Horse', options: ['A: Horse', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
-  { word: 'Стол', meaning: 'Table', options: ['A: Table', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
-  { word: 'Книга', meaning: 'Book', options: ['A: Table', 'B: Book', 'C: Dog', 'D: Cat'], correct: '🇧' }
+  { word: 'Кошка', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇩' },
+  { word: 'Машина', meaning: 'Car', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Car'], correct: '🇩' },
+  { word: 'Город', meaning: 'City', options: ['A: Apple', 'B: House', 'C: Dog', 'D: City'], correct: '🇩' },
+  { word: 'Река', meaning: 'River', options: ['A: Apple', 'B: River', 'C: Dog', 'D: City'], correct: '🇧' },
+  { word: 'Книга', meaning: 'Book', options: ['A: Book', 'B: River', 'C: Dog', 'D: City'], correct: '🇦' }
 ];
 
 // Shuffle array
@@ -172,10 +172,16 @@ const wordOfTheDayChannelId = '1327875414584201350';
 
 // Function to send the Word of the Day
 const sendWordOfTheDay = async () => {
-  const channel = await client.channels.fetch(wordOfTheDayChannelId);
-  const randomWord = words[Math.floor(Math.random() * words.length)];
-
   try {
+    const channel = await client.channels.fetch(wordOfTheDayChannelId);
+
+    if (!channel) {
+      console.error(`Channel with ID ${wordOfTheDayChannelId} not found.`);
+      return;
+    }
+
+    const randomWord = words[Math.floor(Math.random() * words.length)];
+
     const imageUrl = `https://source.unsplash.com/600x400/?${randomWord.meaning}`;
     const response = await axios.get(imageUrl, { responseType: 'stream' });
     const imagePath = path.resolve(__dirname, 'word_of_the_day.jpg');
@@ -199,12 +205,12 @@ const sendWordOfTheDay = async () => {
       console.error('Error writing image file:', err);
     });
   } catch (error) {
-    console.error('Error fetching or sending image:', error);
+    console.error('Error fetching or sending Word of the Day:', error);
   }
 };
 
-// Set up cron job to send Word of the Day at 12:56 PM IST daily
-cron.schedule('56 12 * * *', () => {
+// Set up cron job to send Word of the Day at 13:03 PM IST daily
+cron.schedule('3 13 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
