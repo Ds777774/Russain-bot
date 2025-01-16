@@ -1,6 +1,9 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder } = require('discord.js');
 const express = require('express');
 const cron = require('node-cron');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 // Use environment variable for the bot token
 const TOKEN = process.env.BOT_TOKEN;
@@ -16,9 +19,9 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions
+    GatewayIntentBits.GuildMessageReactions,
   ],
-  partials: [Partials.Message, Partials.Channel, Partials.Reaction]
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 // Express server setup to keep the bot alive
@@ -35,7 +38,10 @@ app.listen(PORT, () => {
 
 // List of Russian words and their meanings
 const words = [
-  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' }
+  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
+  { word: 'Дом', meaning: 'House', options: ['A: Car', 'B: House', 'C: Apple', 'D: Tree'], correct: '🇧' },
+  { word: 'Собака', meaning: 'Dog', options: ['A: Dog', 'B: Cat', 'C: Bird', 'D: Fish'], correct: '🇦' },
+  { word: 'Кошка', meaning: 'Cat', options: ['A: Dog', 'B: Cat', 'C: Elephant', 'D: Fish'], correct: '🇧' },
 ];
 
 // Shuffle array
@@ -112,14 +118,14 @@ client.on('messageCreate', async (message) => {
             word: currentWord.word,
             userAnswer: userAnswer,
             correct: currentWord.meaning,
-            isCorrect: isCorrect
+            isCorrect: isCorrect,
           });
         } else {
           detailedResults.push({
             word: currentWord.word,
             userAnswer: 'No reaction',
             correct: currentWord.meaning,
-            isCorrect: false
+            isCorrect: false,
           });
         }
       } catch (error) {
@@ -128,7 +134,7 @@ client.on('messageCreate', async (message) => {
           word: currentWord.word,
           userAnswer: 'No reaction',
           correct: currentWord.meaning,
-          isCorrect: false
+          isCorrect: false,
         });
       }
 
@@ -158,30 +164,81 @@ client.on('messageCreate', async (message) => {
 });
 
 // Channel ID for Word of the Day
-const wordOfTheDayChannelId = '1303664003444379649';
+const wordOfTheDayChannelId = '1327875414584201350';
+
+// Function to fetch an image of a word from the internet
+const fetchImage = async (query) => {
+  const apiUrl = `https://api.unsplash.com/photos/random?query=${query}&client_id=YOUR_UNSPLASH_ACCESS_KEY`;
+
+  try {
+    const response = await axios.get(apiUrl);
+    const imageUrl = response.data.urls.regular;
+
+    // Download the image
+    const imageResponse = await axios({
+      url: imageUrl,
+      responseType: 'stream',
+    });
+
+    const filePath = path.resolve(__dirname, `${query}.jpg`);
+    const writer = fs.createWriteStream(filePath);
+
+    imageResponse.data.pipe(writer);
+
+    return new Promise((resolve, reject) => {
+      writer.on('finish', () => resolve(filePath));
+      writer.on('error', reject);
+    });
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    return null;
+  }
+};
 
 // Function to send the Word of the Day
 const sendWordOfTheDay = async () => {
   const channel = await client.channels.fetch(wordOfTheDayChannelId);
   const randomWord = words[Math.floor(Math.random() * words.length)];
-  const embed = new EmbedBuilder()
-    .setTitle('**Word of the Day**')
-    .setDescription(`Today's Russian word is **${randomWord.word}**!`)
-    .addFields(
-      { name: 'Meaning', value: randomWord.meaning }
-    )
-    .setColor('#7907ff') // Purple color
-    .setFooter({ text: 'Stay tuned for more words!' });
+  const word = randomWord.word;
 
-  await channel.send({ embeds: [embed] });
+  // Fetch image for the word
+  const imagePath = await fetchImage(word);
+
+  if (imagePath) {
+    const embed = new EmbedBuilder()
+      .setTitle('**Word of the Day**')
+      .setDescription(`Today's Russian word is **${word}**!`)
+      .addFields({ name: 'Meaning', value: randomWord.meaning })
+      .setColor('#7907ff') // Purple color
+      .setFooter({ text: 'Stay tuned for more words!' });
+
+    // Send Word of the Day message with the image
+    await channel.send({
+      embeds: [embed],
+      files: [imagePath],
+    });
+
+    // Delete the image after sending
+    fs.unlinkSync(imagePath);
+  } else {
+    // Send message without image if fetching failed
+    const embed = new EmbedBuilder()
+      .setTitle('**Word of the Day**')
+      .setDescription(`Today's Russian word is **${word}**!`)
+      .addFields({ name: 'Meaning', value: randomWord.meaning })
+      .setColor('#7907ff') // Purple color
+      .setFooter({ text: 'Stay tuned for more words!' });
+
+    await channel.send({ embeds: [embed] });
+  }
 };
 
-// Set up cron job to send Word of the Day at 12:30 PM IST daily
-cron.schedule('30 12 * * *', () => {
+// Set up cron job to send Word of the Day at 12:40 PM IST daily
+cron.schedule('40 12 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
-  timezone: "Asia/Kolkata"
+  timezone: 'Asia/Kolkata',
 });
 
 // Log in to Discord with the bot token
