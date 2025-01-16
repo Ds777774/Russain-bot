@@ -19,9 +19,9 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMessageReactions
   ],
-  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 
 // Express server setup to keep the bot alive
@@ -38,10 +38,7 @@ app.listen(PORT, () => {
 
 // List of Russian words and their meanings
 const words = [
-  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
-  { word: 'Дом', meaning: 'House', options: ['A: Car', 'B: House', 'C: Apple', 'D: Tree'], correct: '🇧' },
-  { word: 'Собака', meaning: 'Dog', options: ['A: Dog', 'B: Cat', 'C: Bird', 'D: Fish'], correct: '🇦' },
-  { word: 'Кошка', meaning: 'Cat', options: ['A: Dog', 'B: Cat', 'C: Elephant', 'D: Fish'], correct: '🇧' },
+  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' }
 ];
 
 // Shuffle array
@@ -118,14 +115,14 @@ client.on('messageCreate', async (message) => {
             word: currentWord.word,
             userAnswer: userAnswer,
             correct: currentWord.meaning,
-            isCorrect: isCorrect,
+            isCorrect: isCorrect
           });
         } else {
           detailedResults.push({
             word: currentWord.word,
             userAnswer: 'No reaction',
             correct: currentWord.meaning,
-            isCorrect: false,
+            isCorrect: false
           });
         }
       } catch (error) {
@@ -134,7 +131,7 @@ client.on('messageCreate', async (message) => {
           word: currentWord.word,
           userAnswer: 'No reaction',
           correct: currentWord.meaning,
-          isCorrect: false,
+          isCorrect: false
         });
       }
 
@@ -166,70 +163,36 @@ client.on('messageCreate', async (message) => {
 // Channel ID for Word of the Day
 const wordOfTheDayChannelId = '1327875414584201350';
 
-// Function to fetch an image of a word from the internet
-const fetchImage = async (query) => {
-  const apiUrl = `https://api.unsplash.com/photos/random?query=${query}&client_id=YOUR_UNSPLASH_ACCESS_KEY`;
-
-  try {
-    const response = await axios.get(apiUrl);
-    const imageUrl = response.data.urls.regular;
-
-    // Download the image
-    const imageResponse = await axios({
-      url: imageUrl,
-      responseType: 'stream',
-    });
-
-    const filePath = path.resolve(__dirname, `${query}.jpg`);
-    const writer = fs.createWriteStream(filePath);
-
-    imageResponse.data.pipe(writer);
-
-    return new Promise((resolve, reject) => {
-      writer.on('finish', () => resolve(filePath));
-      writer.on('error', reject);
-    });
-  } catch (error) {
-    console.error('Error fetching image:', error);
-    return null;
-  }
-};
-
 // Function to send the Word of the Day
 const sendWordOfTheDay = async () => {
   const channel = await client.channels.fetch(wordOfTheDayChannelId);
   const randomWord = words[Math.floor(Math.random() * words.length)];
-  const word = randomWord.word;
 
-  // Fetch image for the word
-  const imagePath = await fetchImage(word);
+  try {
+    const imageUrl = `https://source.unsplash.com/600x400/?${randomWord.meaning}`;
+    const response = await axios.get(imageUrl, { responseType: 'stream' });
+    const imagePath = path.resolve(__dirname, 'word_of_the_day.jpg');
 
-  if (imagePath) {
-    const embed = new EmbedBuilder()
-      .setTitle('**Word of the Day**')
-      .setDescription(`Today's Russian word is **${word}**!`)
-      .addFields({ name: 'Meaning', value: randomWord.meaning })
-      .setColor('#7907ff') // Purple color
-      .setFooter({ text: 'Stay tuned for more words!' });
+    const writer = fs.createWriteStream(imagePath);
+    response.data.pipe(writer);
 
-    // Send Word of the Day message with the image
-    await channel.send({
-      embeds: [embed],
-      files: [imagePath],
+    writer.on('finish', async () => {
+      const embed = new EmbedBuilder()
+        .setTitle('**Word of the Day**')
+        .setDescription(`Today's Russian word is **${randomWord.word}**!`)
+        .addFields({ name: 'Meaning', value: randomWord.meaning })
+        .setColor('#7907ff')
+        .setFooter({ text: 'Stay tuned for more words!' });
+
+      await channel.send({ embeds: [embed], files: [imagePath] });
+      fs.unlinkSync(imagePath); // Delete the image after sending
     });
 
-    // Delete the image after sending
-    fs.unlinkSync(imagePath);
-  } else {
-    // Send message without image if fetching failed
-    const embed = new EmbedBuilder()
-      .setTitle('**Word of the Day**')
-      .setDescription(`Today's Russian word is **${word}**!`)
-      .addFields({ name: 'Meaning', value: randomWord.meaning })
-      .setColor('#7907ff') // Purple color
-      .setFooter({ text: 'Stay tuned for more words!' });
-
-    await channel.send({ embeds: [embed] });
+    writer.on('error', (err) => {
+      console.error('Error writing image file:', err);
+    });
+  } catch (error) {
+    console.error('Error fetching or sending image:', error);
   }
 };
 
@@ -238,7 +201,7 @@ cron.schedule('40 12 * * *', () => {
   sendWordOfTheDay();
 }, {
   scheduled: true,
-  timezone: 'Asia/Kolkata',
+  timezone: "Asia/Kolkata"
 });
 
 // Log in to Discord with the bot token
