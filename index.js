@@ -28,8 +28,7 @@ app.get('/', (req, res) => {
 });
 
 // Start Express server
-const PORT = process.env.PORT || 10000; // Default to 10000 if Render provides no specific port
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
