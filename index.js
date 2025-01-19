@@ -691,7 +691,7 @@ const sendWordOfTheDay = async () => {
 }; 
 
 cron.schedule(
-  '00 12 * * *',
+  '07 12 * * *',
   () => {
     sendWordOfTheDay();
   },
