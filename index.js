@@ -611,6 +611,6 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-cron.schedule('23 16 * * *', sendWordOfTheDay);
+cron.schedule('31 16 * * *', sendWordOfTheDay);
 
 client.login(TOKEN);
