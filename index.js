@@ -347,6 +347,30 @@ const quizData = {
   ],
 };
 
+const wordList = [
+  {
+    word: 'город',
+    meaning: 'City',
+    plural: 'города',
+    indefinite: 'город',
+    definite: 'город',
+  },
+  {
+    word: 'яблоко',
+    meaning: 'Apple',
+    plural: 'яблоки',
+    indefinite: 'яблоко',
+    definite: 'яблоко',
+  },
+  {
+    word: 'книга',
+    meaning: 'Book',
+    plural: 'книги',
+    indefinite: 'книга',
+    definite: 'книга',
+  },
+];
+
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -470,7 +494,7 @@ client.on('messageCreate', async (message) => {
 
       const resultEmbed = new EmbedBuilder()
         .setTitle('Quiz Results')
-        .setDescription(`You scored ${score} out of 5!`)
+        .setDescription(`You scored ${score} out of ${questionsToAsk.length} in level ${selectedLevel}!`)
         .setColor('#7907FF')
         .addFields(
           { name: 'Level', value: selectedLevel, inline: false },
