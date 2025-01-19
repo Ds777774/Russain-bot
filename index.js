@@ -583,38 +583,65 @@ let userLevel = selectedLevel; // Store the user's level
   }
 }); 
 
+const { EmbedBuilder } = require('discord.js');
+const cron = require('node-cron');
+
+// Assuming wordList is an array of objects like this:
+const wordList = [
+  {
+    word: 'example',
+    meaning: 'a representative form or pattern',
+    plural: 'examples',
+    indefinite: 'an',
+    definite: 'the'
+  },
+  // Add more word objects here
+];
+
 // Word of the Day
 const wordOfTheDayChannelId = '1327875414584201350';
-const sendWordOfTheDay = async () => {
-  const channel = await client.channels.fetch(wordOfTheDayChannelId);
-  const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
-  const embed = new EmbedBuilder()
-    .setTitle('**Word of the Day**') // Bold title
-    .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`) // Normal sentence, bold word
-    .addFields(
-      { name: '**Meaning**', value: randomWord.meaning, inline: false },
-      { name: '**Plural**', value: randomWord.plural, inline: false },
-      { name: '**Indefinite Article**', value: randomWord.indefinite, inline: false },
-      { name: '**Definite Article**', value: randomWord.definite, inline: false }
-    )
-    .setColor('#E67E22'); 
 
-  await channel.send({ embeds: [embed] });
-}; 
+const sendWordOfTheDay = async () => {
+  try {
+    const channel = await client.channels.fetch(wordOfTheDayChannelId);
+    const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
+
+    // Check if all necessary properties exist
+    if (!randomWord.word || !randomWord.meaning || !randomWord.plural || !randomWord.indefinite || !randomWord.definite) {
+      console.error('Missing properties in word of the day object.');
+      return;
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle('**Word of the Day**') // Bold title
+      .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`) // Normal sentence, bold word
+      .addFields(
+        { name: '**Meaning**', value: randomWord.meaning, inline: false },
+        { name: '**Plural**', value: randomWord.plural, inline: false },
+        { name: '**Indefinite Article**', value: randomWord.indefinite, inline: false },
+        { name: '**Definite Article**', value: randomWord.definite, inline: false }
+      )
+      .setColor('#E67E22');
+
+    await channel.send({ embeds: [embed] });
+  } catch (error) {
+    console.error('Error sending word of the day:', error);
+  }
+};
 
 cron.schedule(
-  '34 12 * * *',
-  () => {
-    sendWordOfTheDay();
-  },
-  {
-    scheduled: true,
-    timezone: 'Asia/Kolkata',
-  }
-); 
+  '48 12 * * *', // Set to 12:48 IST
+  () => {
+    sendWordOfTheDay();
+  },
+  {
+    scheduled: true,
+    timezone: 'Asia/Kolkata',
+  }
+);
 
 client.once('ready', () => {
-  console.log(`${client.user.tag} is online!`);
-}); 
+  console.log(`${client.user.tag} is online!`);
+});
 
 client.login(TOKEN);
