@@ -613,10 +613,13 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-cron.schedule('8 11 * * *', sendWordOfTheDay); // Schedule for 16:38 IST
+cron.schedule('49 16 * * *', sendWordOfTheDay, {
+  scheduled: true,
+  timezone: 'Asia/Kolkata', // Timezone is set to IST
+});
 
-client.on('ready', () => {
-  console.log('Bot is logged in and ready!');
+client.once('ready', () => {
+  console.log(`${client.user.tag} is online!`);
 });
 
 client.login(TOKEN);
