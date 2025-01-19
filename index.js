@@ -471,6 +471,21 @@ const sendQuizMessage = async (channel, user, question, options) => {
 };
 
 client.on('messageCreate', async (message) => {
+  if (message.content.toLowerCase() === '!help') {
+    const helpEmbed = new EmbedBuilder()
+      .setTitle('Help Menu')
+      .setDescription('Here are the available commands for this bot:')
+      .setColor('#7907FF')
+      .addFields(
+        { name: '!start', value: 'Start a quiz. Select your level and answer questions to test your vocabulary.' },
+        { name: '!help', value: 'Show this help menu with all available commands.' },
+        { name: '!word', value: 'Get the Word of the Day with its meaning, plural, and articles.' }
+      )
+      .setFooter({ text: 'Happy learning!' });
+
+    await message.channel.send({ embeds: [helpEmbed] });
+  }
+
   if (message.content.toLowerCase() === '!start') {
     if (quizInProgress) {
       return message.reply('A quiz is already in progress. Please wait.');
