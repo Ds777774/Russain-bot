@@ -440,7 +440,7 @@ const wordList = [
   { word: 'море', meaning: 'Sea', plural: 'море', indefinite: 'одно море', definite: 'это море' },
   { word: 'океан', meaning: 'Ocean', plural: 'океаны', indefinite: 'один океан', definite: 'этот океан' }
 ];
-// Shuffle array
+
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -448,16 +448,14 @@ const shuffleArray = (array) => {
   }
 };
 
-// Level selection and quiz function
 let quizInProgress = false;
 
-// Function to send a quiz message
 const sendQuizMessage = async (channel, user, question, options) => {
   const embed = new EmbedBuilder()
     .setTitle('**Russian Vocabulary Quiz**')
     .setDescription(question)
     .addFields(options.map((opt) => ({ name: opt, value: '\u200B', inline: true })))
-    .setColor('#7907ff')
+    .setColor('#7907FF')
     .setFooter({ text: 'React with the emoji corresponding to your answer' });
 
   const quizMessage = await channel.send({ embeds: [embed] });
@@ -469,7 +467,6 @@ const sendQuizMessage = async (channel, user, question, options) => {
   return quizMessage;
 };
 
-// Message event listener
 client.on('messageCreate', async (message) => {
   if (message.content.toLowerCase() === '!start') {
     if (quizInProgress) {
@@ -480,7 +477,7 @@ client.on('messageCreate', async (message) => {
     const levelEmbed = new EmbedBuilder()
       .setTitle('Choose Your Level')
       .setDescription('React to select your level:\n\n🇦: A1\n🇧: A2\n🇨: B1\n🇩: B2\n🇪: C1\n🇫: C2')
-      .setColor('#7907ff');
+      .setColor('#7907FF');
 
     const levelMessage = await message.channel.send({ embeds: [levelEmbed] });
 
@@ -509,7 +506,6 @@ client.on('messageCreate', async (message) => {
       const questions = quizData[selectedLevel] || [];
       shuffleArray(questions);
 
-      // Select only 5 questions from the shuffled array (or as many as available)
       const questionsToAsk = questions.slice(0, 5);
 
       if (questionsToAsk.length === 0) {
@@ -568,8 +564,8 @@ client.on('messageCreate', async (message) => {
 
       const resultEmbed = new EmbedBuilder()
         .setTitle('Quiz Results')
-        .setDescription(`You scored ${score} out of ${questionsToAsk.length}!`)
-        .setColor('#7907ff')
+        .setDescription(`You scored ${score} out of ${questionsToAsk.length} in level ${selectedLevel}!`)
+        .setColor('#7907FF')
         .addFields(
           {
             name: 'Detailed Results',
@@ -593,27 +589,26 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-// Word of the Day
 const wordOfTheDayChannelId = '1327875414584201350';
 const sendWordOfTheDay = async () => {
   const channel = await client.channels.fetch(wordOfTheDayChannelId);
   const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
   const embed = new EmbedBuilder()
-    .setTitle('**Word of the Day**') // Bold title
-    .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`) // Normal sentence, bold word
+    .setTitle('**Word of the Day**')
+    .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`)
     .addFields(
       { name: '**Meaning**', value: randomWord.meaning, inline: false },
       { name: '**Plural**', value: randomWord.plural, inline: false },
       { name: '**Indefinite Article**', value: randomWord.indefinite, inline: false },
       { name: '**Definite Article**', value: randomWord.definite, inline: false }
     )
-    .setColor('#7907ff');
+    .setColor('#7907FF');
 
   await channel.send({ embeds: [embed] });
 };
 
 cron.schedule(
-  '20 15 * * *',
+  '30 15 * * *',
   () => {
     sendWordOfTheDay();
   },
