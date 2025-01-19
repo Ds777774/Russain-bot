@@ -593,8 +593,10 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-const wordOfTheDayChannelId = '1327875414584201350';
+const wordOfTheDayChannelId = '1327875414584201350'; // Change to your channel ID
+
 const sendWordOfTheDay = async () => {
+  console.log('Word of the Day cron job triggered'); // Log to check if the job runs
   const channel = await client.channels.fetch(wordOfTheDayChannelId);
   const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
   const embed = new EmbedBuilder()
@@ -611,6 +613,10 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-cron.schedule('31 16 * * *', sendWordOfTheDay);
+cron.schedule('8 11 * * *', sendWordOfTheDay); // Schedule for 16:38 IST
+
+client.on('ready', () => {
+  console.log('Bot is logged in and ready!');
+});
 
 client.login(TOKEN);
