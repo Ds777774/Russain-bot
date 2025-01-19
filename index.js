@@ -344,7 +344,7 @@ const quizData = {
   { word: 'интерсубъективность', meaning: 'Intersubjectivity', options: ['A: Shared experience', 'B: Common understanding', 'C: Intersubjectivity', 'D: Collective knowledge'], correct: '🇩' },
   { word: 'глокализация', meaning: 'Glocalization', options: ['A: Localization', 'B: Globalization', 'C: Glocalization', 'D: Integration'], correct: '🇩' },
   { word: 'интенсиональность', meaning: 'Intentionality', options: ['A: Thoughtfulness', 'B: Purpose', 'C: Intentionality', 'D: Focus'], correct: '🇩' }
-  ],
+  ]
 }; 
 
 // Word of the Day data
@@ -527,7 +527,7 @@ const sendWordOfTheDay = async () => {
 }; 
 
 cron.schedule(
-  '11 14 * * *',
+  '19 14 * * *',
   () => {
     sendWordOfTheDay();
   },
