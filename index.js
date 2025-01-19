@@ -593,7 +593,7 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-const wordOfTheDayChannelId = '1327875414584201350'; // Change to your channel ID
+const wordOfTheDayChannelId = '1303664003444379649'; // Change to your channel ID
 
 const sendWordOfTheDay = async () => {
   console.log('Word of the Day cron job triggered'); // Log to check if the job runs
@@ -613,7 +613,7 @@ const sendWordOfTheDay = async () => {
   await channel.send({ embeds: [embed] });
 };
 
-cron.schedule('49 16 * * *', sendWordOfTheDay, {
+cron.schedule('30 03 * * *', sendWordOfTheDay, {
   scheduled: true,
   timezone: 'Asia/Kolkata', // Timezone is set to IST
 });
