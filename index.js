@@ -1,215 +1,248 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder } = require('discord.js');
 const express = require('express');
-const cron = require('node-cron');
+const cron = require('node-cron'); 
 
-// Use environment variable for the bot token
-const TOKEN = process.env.BOT_TOKEN;
+const TOKEN = process.env.BOT_TOKEN; 
 
 if (!TOKEN) {
-  console.error('Error: BOT_TOKEN environment variable is not set.');
-  process.exit(1); // Exit the app if the token is missing
-}
+  console.error('Error: BOT_TOKEN environment variable is not set.');
+  process.exit(1);
+} 
 
-// Create a new client instance with correct intents
+// Create a new client instance
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions
-  ],
-  partials: [Partials.Message, Partials.Channel, Partials.Reaction]
-});
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageReactions,
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+}); 
 
-// Express server setup to keep the bot alive
+// Express server to keep the bot alive
 const app = express();
 app.get('/', (req, res) => {
-  res.send('Bot is running!');
+  res.send('Bot is running!');
 });
-
-// Start Express server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`)); 
 
-// List of Russian words and their meanings
-const words = [
-  { word: 'Яблоко', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
-  { word: 'Дом', meaning: 'House', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇧' },
-  { word: 'Кошка', meaning: 'Cat', options: ['A: Apple', 'B: House', 'C: Cat', 'D: Dog'], correct: '🇨' },
-  { word: 'Собака', meaning: 'Dog', options: ['A: Dog', 'B: Cat', 'C: Apple', 'D: House'], correct: '🇦' },
-  { word: 'Книга', meaning: 'Book', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Pen'], correct: '🇦' },
-  { word: 'Стол', meaning: 'Table', options: ['A: Book', 'B: Table', 'C: Chair', 'D: Bed'], correct: '🇧' },
- { word: 'Солнце', meaning: 'Sun', options: ['A: Moon', 'B: Sun', 'C: Star', 'D: Cloud'], correct: '🇧' },
-  { word: 'Луна', meaning: 'Moon', options: ['A: Moon', 'B: Sun', 'C: Star', 'D: Sky'], correct: '🇦' },
-  { word: 'Звезда', meaning: 'Star', options: ['A: Star', 'B: Planet', 'C: Galaxy', 'D: Moon'], correct: '🇦' },
-  { word: 'Дерево', meaning: 'Tree', options: ['A: Flower', 'B: Plant', 'C: Tree', 'D: Grass'], correct: '🇨' },
-  { word: 'Река', meaning: 'River', options: ['A: Lake', 'B: River', 'C: Ocean', 'D: Pond'], correct: '🇧' },
-  { word: 'Озеро', meaning: 'Lake', options: ['A: River', 'B: Lake', 'C: Ocean', 'D: Sea'], correct: '🇧' },
-  { word: 'Гора', meaning: 'Mountain', options: ['A: Hill', 'B: Mountain', 'C: Valley', 'D: Forest'], correct: '🇧' },
-  { word: 'Лес', meaning: 'Forest', options: ['A: Forest', 'B: Desert', 'C: Grassland', 'D: Jungle'], correct: '🇦' },
-  { word: 'Птица', meaning: 'Bird', options: ['A: Bird', 'B: Fish', 'C: Mammal', 'D: Reptile'], correct: '🇦' },
-  { word: 'Рыба', meaning: 'Fish', options: ['A: Mammal', 'B: Fish', 'C: Reptile', 'D: Amphibian'], correct: '🇧' },
-  { word: 'Книга', meaning: 'Book', options: ['A: Book', 'B: Notebook', 'C: Diary', 'D: Journal'], correct: '🇦' },
-  { word: 'Письмо', meaning: 'Letter', options: ['A: Email', 'B: Letter', 'C: Note', 'D: Postcard'], correct: '🇧' },
-  { word: 'Стол', meaning: 'Table', options: ['A: Desk', 'B: Table', 'C: Chair', 'D: Bed'], correct: '🇧' },
-  { word: 'Стул', meaning: 'Chair', options: ['A: Chair', 'B: Table', 'C: Bench', 'D: Stool'], correct: '🇦' },
-  { word: 'Зеркало', meaning: 'Mirror', options: ['A: Glass', 'B: Mirror', 'C: Window', 'D: Frame'], correct: '🇧' },
-  { word: 'Окно', meaning: 'Window', options: ['A: Door', 'B: Window', 'C: Curtain', 'D: Roof'], correct: '🇧' },
-  { word: 'Дверь', meaning: 'Door', options: ['A: Window', 'B: Door', 'C: Wall', 'D: Gate'], correct: '🇧' },
-  { word: 'Кровать', meaning: 'Bed', options: ['A: Table', 'B: Chair', 'C: Bed', 'D: Sofa'], correct: '🇨' },
-  { word: 'Собака', meaning: 'Dog', options: ['A: Cat', 'B: Dog', 'C: Rabbit', 'D: Mouse'], correct: '🇧' },
-  { word: 'Кошка', meaning: 'Cat', options: ['A: Dog', 'B: Cat', 'C: Rabbit', 'D: Fox'], correct: '🇧' },
- { "word": "Солнце", "meaning": "Sun", "options": [ "A: Moon", "B: Sun", "C: Star", "D: Cloud" ], "correct": "🇧" }, { "word": "Луна", "meaning": "Moon", "options": [ "A: Moon", "B: Sun", "C: Star", "D: Sky" ], "correct": "🇦" }, { "word": "Звезда", "meaning": "Star", "options": [ "A: Star", "B: Planet", "C: Galaxy", "D: Moon" ], "correct": "🇦" }, { "word": "Дерево", "meaning": "Tree", "options": [ "A: Flower", "B: Plant", "C: Tree", "D: Grass" ], "correct": "🇨" }, { "word": "Река", "meaning": "River", "options": [ "A: Lake", "B: River", "C: Ocean", "D: Pond" ], "correct": "🇧" }, { "word": "Озеро", "meaning": "Lake", "options": [ "A: River", "B: Lake", "C: Ocean", "D: Sea" ], "correct": "🇧" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Hill", "B: Mountain", "C: Valley", "D: Forest" ], "correct": "🇧" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Forest", "B: Desert", "C: Grassland", "D: Jungle" ], "correct": "🇦" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Fish", "C: Mammal", "D: Reptile" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Mammal", "B: Fish", "C: Reptile", "D: Amphibian" ], "correct": "🇧" },
-{ "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Book", "C: City", "D: House" ], "correct": "🇦" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Sea", "B: Apple", "C: Student", "D: Pen" ], "correct": "🇧" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Dog", "B: Bird", "C: Table", "D: Book" ], "correct": "🇨" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Teacher", "B: Dog", "C: Pen", "D: Bird" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: Car", "B: Sea", "C: Cat", "D: City" ], "correct": "🇩" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Phone", "B: Road", "C: Forest", "D: Cat" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Sea", "B: Phone", "C: Teacher", "D: House" ], "correct": "🇨" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: Forest", "C: Bird", "D: Apple" ], "correct": "🇦" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Cat", "B: Car", "C: Table", "D: Teacher" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: City", "B: Forest", "C: Pen", "D: Mountain" ], "correct": "🇦" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Phone", "B: Sea", "C: Car", "D: Road" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Dog", "B: Sea", "C: Phone", "D: Food" ], "correct": "🇩" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Book", "B: Cat", "C: City", "D: Road" ], "correct": "🇦" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Car", "B: Cat", "C: Table", "D: Pen" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Teacher", "B: House", "C: Pen", "D: Car" ], "correct": "🇦" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Car", "B: Pen", "C: Bird", "D: Book" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Mountain", "B: Fish", "C: Forest", "D: Sea" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Cat", "B: Dog", "C: Teacher", "D: Fish" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Teacher", "B: Fish", "C: Phone", "D: Forest" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Table", "B: Student", "C: Cat", "D: Sea" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: Student", "B: Food", "C: Dog", "D: City" ], "correct": "🇩" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Car", "B: Road", "C: Phone", "D: House" ], "correct": "🇨" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Phone", "B: Car", "C: Cat", "D: House" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Sea", "B: Road", "C: Forest", "D: Book" ], "correct": "🇧" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Table", "B: Road", "C: Sea", "D: Mountain" ], "correct": "🇧" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Pen", "B: Food", "C: Mountain", "D: City" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Bird", "B: Fish", "C: Student", "D: Sea" ], "correct": "🇩" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Sea", "B: Fish", "C: Apple", "D: House" ], "correct": "🇦" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Apple", "B: Fish", "C: City", "D: Pen" ], "correct": "🇩" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Teacher", "B: Pen", "C: Table", "D: City" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Book", "B: House", "C: Sea", "D: Cat" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Road", "C: Table", "D: City" ], "correct": "🇦" }, { "word": "Стол", "meaning": "Table", "options": [ "A: House", "B: Student", "C: Table", "D: Sea" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Car", "B: Book", "C: Apple", "D: Bird" ], "correct": "🇦" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Student", "B: Pencil", "C: Bird", "D: House" ], "correct": "🇦" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Dog", "B: Bird", "C: Forest", "D: Student" ], "correct": "🇩" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Pen", "B: City", "C: Bird", "D: Table" ], "correct": "🇨" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: City", "B: Pen", "C: Student", "D: House" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Dog", "B: Car", "C: Phone", "D: Pen" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Student", "B: Teacher", "C: Forest", "D: Car" ], "correct": "🇧" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Phone", "B: Road", "C: Student", "D: Book" ], "correct": "🇦" }, { "word": "Дом", "meaning": "House", "options": [ "A: House", "B: Phone", "C: City", "D: Forest" ], "correct": "🇦" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Table", "B: Cat", "C: Teacher", "D: Car" ], "correct": "🇧" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Pen", "B: Bird", "C: Mountain", "D: Car" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: Road", "B: Book", "C: City", "D: Sea" ], "correct": "🇨" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: House", "B: Phone", "C: Dog", "D: Apple" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Student", "B: Fish", "C: Teacher", "D: Road" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Pencil", "B: Phone", "C: Teacher", "D: Forest" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Phone", "B: Student", "C: City", "D: Table" ], "correct": "🇦" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Apple", "B: Bird", "C: City", "D: Student" ], "correct": "🇩" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Road", "B: Table", "C: Cat", "D: Pencil" ], "correct": "🇩" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Teacher", "B: Phone", "C: Book", "D: Forest" ], "correct": "🇩" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Pencil", "B: Teacher", "C: Phone", "D: Mountain" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Road", "B: Apple", "C: Fish", "D: Sea" ], "correct": "🇩" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Apple", "B: Pencil", "C: Car", "D: Phone" ], "correct": "🇦" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Table", "B: Food", "C: Teacher", "D: Pen" ], "correct": "🇧" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Forest", "B: Teacher", "C: Mountain", "D: Pencil" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Road", "B: Bird", "C: Teacher", "D: Mountain" ], "correct": "🇩" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Road", "B: Pencil", "C: Phone", "D: Food" ], "correct": "🇦" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Phone", "B: Student", "C: City", "D: Teacher" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Book", "B: Dog", "C: Apple", "D: Teacher" ], "correct": "🇨" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Sea", "B: Bird", "C: Fish", "D: Apple" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Fish", "B: Forest", "C: Cat", "D: Phone" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: Cat", "B: City", "C: Car", "D: Pen" ], "correct": "🇧" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Table", "B: City", "C: Book", "D: Fish" ], "correct": "🇩" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Apple", "B: Student", "C: Sea", "D: Table" ], "correct": "🇦" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Book", "B: Car", "C: Student", "D: Pen" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: Bird", "B: Pen", "C: Sea", "D: City" ], "correct": "🇩" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Sea", "B: Table", "C: Forest", "D: Student" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Table", "B: Car", "C: Pen", "D: Road" ], "correct": "🇧" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Table", "B: Fish", "C: Bird", "D: Cat" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: City", "B: House", "C: Book", "D: Dog" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Cat", "B: Fish", "C: Sea", "D: Bird" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Car", "B: Bird", "C: Fish", "D: Sea" ], "correct": "🇩" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Fish", "B: Student", "C: Food", "D: Pencil" ], "correct": "🇧" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Forest", "B: Pen", "C: Phone", "D: Student" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: Sea", "B: Book", "C: City", "D: Food" ], "correct": "🇨" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Sea", "B: Dog", "C: Apple", "D: Pencil" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Teacher", "B: Road", "C: Sea", "D: Apple" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Book", "B: Phone", "C: House", "D: Dog" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Mountain", "B: House", "C: Road", "D: City" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Student", "B: Forest", "C: Car", "D: Food" ], "correct": "🇧" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Car", "B: Teacher", "C: Bird", "D: Mountain" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Teacher", "B: Book", "C: Bird", "D: Road" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: Bird", "B: Pen", "C: Phone", "D: City" ], "correct": "🇩" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Pen", "B: Book", "C: Mountain", "D: Car" ], "correct": "🇩" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Pencil", "B: Forest", "C: House", "D: Sea" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: City", "B: Bird", "C: Food", "D: Student" ], "correct": "🇧" }, { "word": "Город", "meaning": "City", "options": [ "A: City", "B: Book", "C: Fish", "D: Bird" ], "correct": "🇦" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Fish", "B: Road", "C: Pen", "D: Sea" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Pen", "B: Forest", "C: Food", "D: Sea" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Car", "B: Phone", "C: Sea", "D: Table" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Fish", "B: Mountain", "C: House", "D: Bird" ], "correct": "🇨" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Apple", "B: Mountain", "C: House", "D: Book" ], "correct": "🇩" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Apple", "B: Sea", "C: Student", "D: Forest" ], "correct": "🇩" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Apple", "B: Cat", "C: Teacher", "D: Pencil" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Pencil", "B: Sea", "C: City", "D: Dog" ], "correct": "🇩" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Book", "B: Bird", "C: Pencil", "D: Student" ], "correct": "🇨" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: Food", "C: Fish", "D: House" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Phone", "B: Pencil", "C: Pen", "D: Fish" ], "correct": "🇧" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Cat", "B: Table", "C: Teacher", "D: Mountain" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: Pencil", "B: Book", "C: City", "D: Mountain" ], "correct": "🇨" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Sea", "B: Mountain", "C: Book", "D: Table" ], "correct": "🇩" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Dog", "B: Car", "C: Apple", "D: Food" ], "correct": "🇦" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Book", "B: Pen", "C: Bird", "D: Phone" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Pencil", "B: Forest", "C: Pen", "D: Student" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Bird", "B: Car", "C: Apple", "D: Student" ], "correct": "🇨" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: City", "B: Book", "C: Dog", "D: Pen" ], "correct": "🇨" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Sea", "B: Phone", "C: Table", "D: House" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: House", "B: Pen", "C: Bird", "D: Teacher" ], "correct": "🇦" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Phone", "B: Bird", "C: Fish", "D: Book" ], "correct": "🇦" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Fish", "B: Phone", "C: Cat", "D: Dog" ], "correct": "🇧" }, { "word": "Дом", "meaning": "House", "options": [ "A: Table", "B: Car", "C: Road", "D: House" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Car", "B: Table", "C: Fish", "D: Phone" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Sea", "B: Bird", "C: Pen", "D: Dog" ], "correct": "🇦" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Road", "B: Car", "C: Pen", "D: Sea" ], "correct": "🇨" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Mountain", "B: Pen", "C: Pencil", "D: Food" ], "correct": "🇨" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Food", "B: Cat", "C: Forest", "D: Pencil" ], "correct": "🇨" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: House", "B: Teacher", "C: Bird", "D: City" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Pen", "B: House", "C: Forest", "D: Table" ], "correct": "🇧" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Road", "B: Student", "C: Table", "D: House" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Forest", "B: Bird", "C: Car", "D: City" ], "correct": "🇦" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: Student", "C: House", "D: Bird" ], "correct": "🇦" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Cat", "B: Sea", "C: Forest", "D: Road" ], "correct": "🇩" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Bird", "B: Teacher", "C: Dog", "D: Food" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Teacher", "B: Mountain", "C: Pen", "D: Table" ], "correct": "🇧" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: City", "B: Cat", "C: Road", "D: Teacher" ], "correct": "🇨" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: City", "C: Road", "D: Car" ], "correct": "🇦" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Food", "B: Teacher", "C: Dog", "D: Pen" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: House", "B: Fish", "C: City", "D: Car" ], "correct": "🇧" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Dog", "B: Food", "C: Mountain", "D: Fish" ], "correct": "🇨" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Dog", "B: Pen", "C: Forest", "D: Student" ], "correct": "🇨" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Teacher", "B: Cat", "C: Phone", "D: Apple" ], "correct": "🇧" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: House", "B: Teacher", "C: Fish", "D: Student" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: Sea", "B: Book", "C: City", "D: Apple" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: Fish", "B: House", "C: City", "D: Table" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Fish", "B: Car", "C: Food", "D: Forest" ], "correct": "🇧" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Book", "B: Dog", "C: Sea", "D: Phone" ], "correct": "🇦" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Book", "B: Student", "C: Sea", "D: Phone" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Sea", "B: Forest", "C: Road", "D: Apple" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Dog", "B: Table", "C: Sea", "D: Apple" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Pen", "B: Sea", "C: Book", "D: Forest" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Mountain", "B: Apple", "C: House", "D: Car" ], "correct": "🇨" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Teacher", "B: Apple", "C: Forest", "D: Pen" ], "correct": "🇧" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Student", "B: Pen", "C: Food", "D: House" ], "correct": "🇦" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Car", "B: Sea", "C: Table", "D: Food" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Forest", "B: House", "C: Sea", "D: Apple" ], "correct": "🇧" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: House", "B: Forest", "C: Cat", "D: Student" ], "correct": "🇩" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: City", "B: Dog", "C: Pen", "D: Road" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: City", "B: Food", "C: Teacher", "D: Pencil" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Book", "B: Fish", "C: House", "D: Teacher" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Mountain", "B: Book", "C: Fish", "D: Apple" ], "correct": "🇨" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Phone", "B: Mountain", "C: Fish", "D: Student" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: City", "B: Car", "C: House", "D: Pencil" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Pencil", "B: Car", "C: Fish", "D: Bird" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: House", "B: Fish", "C: Table", "D: Teacher" ], "correct": "🇩" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Dog", "B: Forest", "C: Pen", "D: Student" ], "correct": "🇨" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Sea", "B: City", "C: Dog", "D: Food" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Book", "B: Mountain", "C: Pencil", "D: Car" ], "correct": "🇧" }, { "word": "Дом", "meaning": "House", "options": [ "A: House", "B: Apple", "C: Pen", "D: Road" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: Car", "B: City", "C: Sea", "D: Apple" ], "correct": "🇧" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Fish", "B: Mountain", "C: Forest", "D: Food" ], "correct": "🇨" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Road", "B: Pencil", "C: Teacher", "D: Cat" ], "correct": "🇧" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Forest", "B: Mountain", "C: Bird", "D: Phone" ], "correct": "🇧" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Student", "B: House", "C: Phone", "D: Pen" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Pen", "B: Student", "C: Fish", "D: Mountain" ], "correct": "🇨" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Road", "B: Bird", "C: Apple", "D: Sea" ], "correct": "🇧" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Pen", "B: City", "C: Book", "D: House" ], "correct": "🇨" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: City", "B: Mountain", "C: Bird", "D: Pencil" ], "correct": "🇨" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Fish", "B: Phone", "C: Sea", "D: Table" ], "correct": "🇦" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Cat", "B: Apple", "C: Road", "D: Car" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: Table", "B: Student", "C: Phone", "D: City" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: Bird", "B: Pencil", "C: Forest", "D: City" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Phone", "B: Book", "C: House", "D: Student" ], "correct": "🇨" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Apple", "B: Teacher", "C: Mountain", "D: Pencil" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Dog", "B: Teacher", "C: Fish", "D: Book" ], "correct": "🇧" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Apple", "B: Road", "C: Mountain", "D: Student" ], "correct": "🇩" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: City", "B: Teacher", "C: Student", "D: House" ], "correct": "🇨" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Mountain", "B: Forest", "C: Fish", "D: Apple" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Table", "B: City", "C: Student", "D: Cat" ], "correct": "🇩" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Dog", "B: Car", "C: Food", "D: Book" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Table", "B: Sea", "C: Apple", "D: Road" ], "correct": "🇧" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Book", "B: Student", "C: Food", "D: Car" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: City", "B: Road", "C: Food", "D: Sea" ], "correct": "🇩" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Car", "B: City", "C: Book", "D: Table" ], "correct": "🇦" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Cat", "B: Teacher", "C: Dog", "D: City" ], "correct": "🇨" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Pencil", "B: Pen", "C: Phone", "D: Bird" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Pencil", "B: Food", "C: Forest", "D: Book" ], "correct": "🇨" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Table", "B: Bird", "C: Apple", "D: Mountain" ], "correct": "🇨" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Mountain", "B: Apple", "C: Pen", "D: City" ], "correct": "🇨" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Teacher", "B: Cat", "C: Food", "D: Dog" ], "correct": "🇧" }, { "word": "Город", "meaning": "City", "options": [ "A: Forest", "B: Dog", "C: City", "D: Mountain" ], "correct": "🇨" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Forest", "B: Road", "C: Table", "D: Dog" ], "correct": "🇩" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Phone", "B: Bird", "C: Sea", "D: Pencil" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Book", "B: House", "C: Food", "D: Dog" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Cat", "B: City", "C: Mountain", "D: Apple" ], "correct": "🇦" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Food", "C: Forest", "D: Table" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Forest", "B: Student", "C: Sea", "D: Food" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Car", "B: Food", "C: Mountain", "D: Forest" ], "correct": "🇩" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Phone", "B: Pen", "C: Dog", "D: City" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Dog", "B: Cat", "C: Food", "D: Pencil" ], "correct": "🇩" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Cat", "B: City", "C: Sea", "D: Bird" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: City", "B: Food", "C: Bird", "D: Pen" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Mountain", "B: Teacher", "C: Fish", "D: Bird" ], "correct": "🇨" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Dog", "B: Fish", "C: Food", "D: Car" ], "correct": "🇧" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Cat", "B: Pencil", "C: City", "D: Mountain" ], "correct": "🇧" }, { "word": "Дом", "meaning": "House", "options": [ "A: House", "B: Pen", "C: Food", "D: Apple" ], "correct": "🇦" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Table", "B: City", "C: Book", "D: Fish" ], "correct": "🇨" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Forest", "B: Table", "C: Pencil", "D: Road" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Teacher", "B: Fish", "C: Pencil", "D: Bird" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Pen", "B: Forest", "C: Fish", "D: Pencil" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Sea", "B: Student", "C: Phone", "D: Forest" ], "correct": "🇨" }, { "word": "Город", "meaning": "City", "options": [ "A: Apple", "B: City", "C: Book", "D: Phone" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Forest", "B: Student", "C: Pen", "D: Sea" ], "correct": "🇩" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Book", "B: Mountain", "C: City", "D: Food" ], "correct": "🇧" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Bird", "B: Pen", "C: Apple", "D: City" ], "correct": "🇧" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Car", "B: Pencil", "C: Food", "D: House" ], "correct": "🇧" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Dog", "B: Bird", "C: Phone", "D: Mountain" ], "correct": "🇨" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Forest", "B: Table", "C: Cat", "D: Apple" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Sea", "B: Mountain", "C: Apple", "D: Student" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Phone", "B: Mountain", "C: City", "D: Fish" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Bird", "B: Fish", "C: Car", "D: Cat" ], "correct": "🇧" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: City", "B: Fish", "C: Mountain", "D: House" ], "correct": "🇨" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Pencil", "B: Bird", "C: Forest", "D: Phone" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: City", "B: Forest", "C: Road", "D: Fish" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Book", "B: House", "C: Phone", "D: Pen" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Cat", "B: Student", "C: Road", "D: Fish" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: Table", "B: Dog", "C: City", "D: Pen" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Apple", "B: Road", "C: Bird", "D: Mountain" ], "correct": "🇩" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Fish", "B: Bird", "C: Car", "D: Teacher" ], "correct": "🇨" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Pen", "B: House", "C: Table", "D: Phone" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Teacher", "B: Table", "C: Food", "D: Pen" ], "correct": "🇦" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: City", "B: Cat", "C: Car", "D: Mountain" ], "correct": "🇧" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Mountain", "B: Phone", "C: Cat", "D: Fish" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Cat", "B: Apple", "C: City", "D: Bird" ], "correct": "🇧" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Sea", "B: Road", "C: Mountain", "D: Dog" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Car", "B: Cat", "C: Bird", "D: Pen" ], "correct": "🇧" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: House", "B: Forest", "C: Student", "D: Fish" ], "correct": "🇩" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Teacher", "B: Car", "C: Sea", "D: Food" ], "correct": "🇦" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: City", "B: Mountain", "C: Dog", "D: Sea" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Book", "B: Forest", "C: Food", "D: Teacher" ], "correct": "🇩" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Pen", "B: Apple", "C: Book", "D: Forest" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Student", "B: Sea", "C: Mountain", "D: Dog" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Student", "B: Dog", "C: Mountain", "D: Book" ], "correct": "🇧" }, { "word": "Город", "meaning": "City", "options": [ "A: Car", "B: Food", "C: Apple", "D: City" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Mountain", "B: City", "C: Teacher", "D: House" ], "correct": "🇩" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Road", "B: Apple", "C: Car", "D: Table" ], "correct": "🇩" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Phone", "B: Pencil", "C: Sea", "D: Bird" ], "correct": "🇦" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Sea", "B: Food", "C: Book", "D: Mountain" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Cat", "B: Food", "C: Student", "D: House" ], "correct": "🇩" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: Book", "C: Pencil", "D: Apple" ], "correct": "🇦" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Forest", "B: Sea", "C: Table", "D: House" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Pencil", "B: Food", "C: Sea", "D: Mountain" ], "correct": "🇨" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Fish", "B: Book", "C: Table", "D: Teacher" ], "correct": "🇧" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Dog", "B: Apple", "C: Car", "D: Food" ], "correct": "🇩" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Forest", "B: House", "C: Bird", "D: Teacher" ], "correct": "🇩" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Bird", "B: Teacher", "C: Forest", "D: Book" ], "correct": "🇨" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Fish", "B: Dog", "C: Cat", "D: Pencil" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Sea", "B: Road", "C: Dog", "D: Pencil" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Mountain", "C: Food", "D: Cat" ], "correct": "🇦" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Fish", "B: Teacher", "C: Apple", "D: Bird" ], "correct": "🇨" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Sea", "B: Pen", "C: Fish", "D: Apple" ], "correct": "🇧" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Bird", "B: Table", "C: Food", "D: Cat" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Sea", "B: Mountain", "C: Road", "D: Phone" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Forest", "B: Apple", "C: Mountain", "D: Pen" ], "correct": "🇦" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Bird", "B: Book", "C: Phone", "D: Apple" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: City", "B: Road", "C: Mountain", "D: Cat" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Dog", "B: Pen", "C: Bird", "D: Teacher" ], "correct": "🇨" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Food", "B: Fish", "C: Apple", "D: Phone" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Student", "B: Dog", "C: Apple", "D: House" ], "correct": "🇧" }, { "word": "Дом", "meaning": "House", "options": [ "A: Table", "B: House", "C: Apple", "D: Bird" ], "correct": "🇧" }, { "word": "Дом", "meaning": "House", "options": [ "A: House", "B: Cat", "C: Road", "D: Forest" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Road", "B: Pencil", "C: Student", "D: Table" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Pen", "B: Dog", "C: Food", "D: Pencil" ], "correct": "🇧" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Fish", "B: Student", "C: Phone", "D: Table" ], "correct": "🇩" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Apple", "B: Sea", "C: Mountain", "D: Table" ], "correct": "🇧" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: Road", "C: Teacher", "D: Dog" ], "correct": "🇦" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Pencil", "B: Car", "C: House", "D: Mountain" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Cat", "B: Forest", "C: Book", "D: Phone" ], "correct": "🇦" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Apple", "B: Phone", "C: Pen", "D: Forest" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Pen", "B: Pencil", "C: House", "D: Mountain" ], "correct": "🇩" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: City", "B: Bird", "C: Apple", "D: Pen" ], "correct": "🇨" }, { "word": "Дом", "meaning": "House", "options": [ "A: Mountain", "B: Pen", "C: Book", "D: House" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Pen", "B: Cat", "C: House", "D: Car" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Road", "B: Pen", "C: Bird", "D: City" ], "correct": "🇦" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Cat", "B: Mountain", "C: Book", "D: Pen" ], "correct": "🇧" }, { "word": "Кошка", "meaning": "Cat", "options": [ "A: Cat", "B: Fish", "C: Forest", "D: Book" ], "correct": "🇦" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Car", "B: Road", "C: Student", "D: Table" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Bird", "B: Food", "C: Pencil", "D: Pen" ], "correct": "🇧" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Pencil", "B: Cat", "C: Book", "D: House" ], "correct": "🇦" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Food", "B: Apple", "C: Cat", "D: Forest" ], "correct": "🇩" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Pen", "B: Book", "C: Phone", "D: Dog" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Dog", "B: Pen", "C: House", "D: Phone" ], "correct": "🇩" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: House", "B: Book", "C: Food", "D: Pen" ], "correct": "🇩" }, { "word": "Город", "meaning": "City", "options": [ "A: Phone", "B: Food", "C: City", "D: Apple" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Bird", "B: Pen", "C: Book", "D: Mountain" ], "correct": "🇩" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Sea", "B: Table", "C: Cat", "D: House" ], "correct": "🇧" }, { "word": "Стол", "meaning": "Table", "options": [ "A: House", "B: Table", "C: Pencil", "D: Road" ], "correct": "🇧" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Car", "B: Food", "C: Sea", "D: Pen" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Pencil", "B: Road", "C: Food", "D: Apple" ], "correct": "🇦" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Pen", "B: City", "C: Food", "D: Student" ], "correct": "🇨" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Phone", "B: Dog", "C: Fish", "D: Table" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Phone", "B: Cat", "C: Sea", "D: City" ], "correct": "🇨" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: City", "B: Car", "C: Dog", "D: Fish" ], "correct": "🇨" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Pencil", "B: Phone", "C: Apple", "D: House" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Forest", "B: Dog", "C: Car", "D: Table" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Fish", "B: Apple", "C: Teacher", "D: Sea" ], "correct": "🇩" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Book", "B: Road", "C: Table", "D: Apple" ], "correct": "🇨" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Food", "B: Forest", "C: City", "D: Pencil" ], "correct": "🇩" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Car", "B: Sea", "C: Bird", "D: Apple" ], "correct": "🇩" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Bird", "B: Phone", "C: Table", "D: Forest" ], "correct": "🇩" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Food", "B: Apple", "C: Teacher", "D: City" ], "correct": "🇧" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Road", "B: Teacher", "C: Phone", "D: Food" ], "correct": "🇩" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: House", "B: Teacher", "C: Pen", "D: Apple" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: City", "B: Road", "C: Car", "D: Book" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Fish", "B: Dog", "C: Car", "D: Food" ], "correct": "🇧" }, { "word": "Лес", "meaning": "Forest", "options": [ "A: Forest", "B: Sea", "C: Pencil", "D: Student" ], "correct": "🇦" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Car", "B: City", "C: Student", "D: Forest" ], "correct": "🇦" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Pen", "B: Cat", "C: Car", "D: Pencil" ], "correct": "🇦" }, { "word": "Город", "meaning": "City", "options": [ "A: City", "B: Table", "C: Bird", "D: Pen" ], "correct": "🇦" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Pencil", "B: Fish", "C: Teacher", "D: Table" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Table", "B: Car", "C: Phone", "D: City" ], "correct": "🇧" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Phone", "B: Book", "C: Apple", "D: Food" ], "correct": "🇩" }, { "word": "Море", "meaning": "Sea", "options": [ "A: House", "B: Forest", "C: Phone", "D: Sea" ], "correct": "🇩" }, { "word": "Стол", "meaning": "Table", "options": [ "A: Table", "B: Bird", "C: Sea", "D: Food" ], "correct": "🇦" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Dog", "B: Cat", "C: Car", "D: Student" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Cat", "B: Mountain", "C: Student", "D: Road" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: City", "C: Forest", "D: Phone" ], "correct": "🇦" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Phone", "B: Mountain", "C: Teacher", "D: City" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Pen", "C: House", "D: Pencil" ], "correct": "🇦" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Food", "B: Sea", "C: Book", "D: Cat" ], "correct": "🇦" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Forest", "B: Apple", "C: Dog", "D: Student" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Food", "B: Apple", "C: Book", "D: Table" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Teacher", "B: House", "C: Sea", "D: Bird" ], "correct": "🇩" }, { "word": "Еда", "meaning": "Food", "options": [ "A: House", "B: Teacher", "C: Food", "D: Sea" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Food", "B: Pen", "C: Mountain", "D: Car" ], "correct": "🇦" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Pen", "B: Forest", "C: Apple", "D: Road" ], "correct": "🇩" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Bird", "B: Book", "C: Food", "D: Teacher" ], "correct": "🇦" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Student", "B: Phone", "C: Pen", "D: Food" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Fish", "B: Pencil", "C: Dog", "D: Student" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Cat", "B: Pencil", "C: Pen", "D: Food" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Book", "B: Dog", "C: Food", "D: Phone" ], "correct": "🇧" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Book", "B: House", "C: Road", "D: Phone" ], "correct": "🇦" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Fish", "B: Mountain", "C: Forest", "D: House" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Pencil", "B: Food", "C: Apple", "D: Phone" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Teacher", "B: Food", "C: Mountain", "D: Bird" ], "correct": "🇧" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Book", "B: Apple", "C: Pen", "D: Pencil" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Mountain", "B: Food", "C: Sea", "D: Bird" ], "correct": "🇧" }, { "word": "Дом", "meaning": "House", "options": [ "A: Pen", "B: Phone", "C: Cat", "D: House" ], "correct": "🇩" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Pencil", "B: Food", "C: Fish", "D: Pen" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Dog", "B: Food", "C: Car", "D: Cat" ], "correct": "🇧" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Book", "B: Apple", "C: Fish", "D: Car" ], "correct": "🇨" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Apple", "B: Bird", "C: Pencil", "D: Sea" ], "correct": "🇦" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Forest", "B: City", "C: Cat", "D: Mountain" ], "correct": "🇩" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Mountain", "B: Cat", "C: Teacher", "D: Sea" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Forest", "B: Student", "C: City", "D: Pencil" ], "correct": "🇩" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Road", "B: House", "C: Pencil", "D: Student" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Book", "B: Forest", "C: Fish", "D: Mountain" ], "correct": "🇨" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Pen", "B: Pencil", "C: Dog", "D: Apple" ], "correct": "🇨" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: House", "B: Pencil", "C: Teacher", "D: Mountain" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: City", "B: Teacher", "C: Table", "D: Mountain" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Pencil", "B: House", "C: Bird", "D: Dog" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Fish", "B: House", "C: Phone", "D: Book" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Sea", "B: Phone", "C: Car", "D: Fish" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Road", "B: Bird", "C: Forest", "D: Book" ], "correct": "🇧" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Pencil", "B: City", "C: Teacher", "D: Road" ], "correct": "🇦" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Fish", "B: Car", "C: Teacher", "D: City" ], "correct": "🇦" }, { "word": "Море", "meaning": "Sea", "options": [ "A: City", "B: Teacher", "C: Pen", "D: Sea" ], "correct": "🇩" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Apple", "B: Forest", "C: Cat", "D: Phone" ], "correct": "🇩" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Fish", "B: Pencil", "C: Pen", "D: City" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Cat", "B: Sea", "C: Dog", "D: Food" ], "correct": "🇧" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Dog", "B: Sea", "C: Fish", "D: Pencil" ], "correct": "🇨" }, { "word": "Ручка", "meaning": "Pen", "options": [ "A: Sea", "B: Pen", "C: Mountain", "D: Car" ], "correct": "🇧" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Sea", "B: Bird", "C: Pen", "D: Dog" ], "correct": "🇦" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Pen", "B: City", "C: Fish", "D: Pencil" ], "correct": "🇩" }, { "word": "Карандаш", "meaning": "Pencil", "options": [ "A: Food", "B: Pencil", "C: Student", "D: Sea" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Apple", "B: Pen", "C: Forest", "D: Dog" ], "correct": "🇩" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Food", "B: Apple", "C: Sea", "D: Road" ], "correct": "🇧" }, { "word": "Птица", "meaning": "Bird", "options": [ "A: Teacher", "B: Book", "C: Bird", "D: Pen" ], "correct": "🇨" }, { "word": "Море", "meaning": "Sea", "options": [ "A: Dog", "B: Sea", "C: Student", "D: Cat" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Road", "B: Sea", "C: Apple", "D: Student" ], "correct": "🇨" }, { "word": "Гора", "meaning": "Mountain", "options": [ "A: Cat", "B: Car", "C: Mountain", "D: Book" ], "correct": "🇨" }, { "word": "Рыба", "meaning": "Fish", "options": [ "A: Fish", "B: Pen", "C: Forest", "D: Book" ], "correct": "🇦" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Road", "B: Phone", "C: Pen", "D: Car" ], "correct": "🇩" }, { "word": "Дом", "meaning": "House", "options": [ "A: Mountain", "B: House", "C: Forest", "D: Food" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Forest", "B: Table", "C: Dog", "D: Teacher" ], "correct": "🇨" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Car", "B: Food", "C: Student", "D: Forest" ], "correct": "🇨" }, { "word": "Дорога", "meaning": "Road", "options": [ "A: Apple", "B: Road", "C: Student", "D: Bird" ], "correct": "🇧" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Phone", "B: City", "C: Food", "D: Car" ], "correct": "🇨" }, { "word": "Телефон", "meaning": "Phone", "options": [ "A: Teacher", "B: Phone", "C: City", "D: Cat" ], "correct": "🇧" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Dog", "B: Student", "C: Teacher", "D: Food" ], "correct": "🇧" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Student", "B: Teacher", "C: Mountain", "D: House" ], "correct": "🇧" }, { "word": "Книга", "meaning": "Book", "options": [ "A: Book", "B: Food", "C: Teacher", "D: Student" ], "correct": "🇦" }, { "word": "Дом", "meaning": "House", "options": [ "A: Cat", "B: Student", "C: House", "D: Dog" ], "correct": "🇨" }, { "word": "Машина", "meaning": "Car", "options": [ "A: Fish", "B: House", "C: Car", "D: Cat" ], "correct": "🇨" }, { "word": "Учитель", "meaning": "Teacher", "options": [ "A: Food", "B: Road", "C: Teacher", "D: Apple" ], "correct": "🇨" }, { "word": "Еда", "meaning": "Food", "options": [ "A: Phone", "B: Food", "C: Student", "D: Dog" ], "correct": "🇧" }, { "word": "Яблоко", "meaning": "Apple", "options": [ "A: Table", "B: Food", "C: Apple", "D: Book" ], "correct": "🇨" }, { "word": "Ученик", "meaning": "Student", "options": [ "A: Road", "B: Student", "C: Apple", "D: Pen" ], "correct": "🇧" }, { "word": "Собака", "meaning": "Dog", "options": [ "A: Dog", "B: Phone", "C: Car", "D: Student" ], "correct": "🇦" }
-];
+// Quiz data by levels
+const quizData = {
+  A1: [
+  { word: 'Apfel', meaning: 'Apple', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇦' },
+  { word: 'Haus', meaning: 'House', options: ['A: Apple', 'B: House', 'C: Dog', 'D: Cat'], correct: '🇧' }
+   ],
+  A2: [
+   { word: 'Abend', meaning: 'Evening', options: ['A: Morning', 'B: Evening', 'C: Night', 'D: Afternoon'], correct: '🇧' },
+  { word: 'Arzt', meaning: 'Doctor', options: ['A: Teacher', 'B: Doctor', 'C: Nurse', 'D: Patient'], correct: '🇧' }
+  ],
+    B1: [
+  { word: 'Abenteuer', meaning: 'Adventure', options: ['A: Routine', 'B: Challenge', 'C: Adventure', 'D: Job'], correct: '🇨' },
+  { word: 'Angebot', meaning: 'Offer', options: ['A: Request', 'B: Offer', 'C: Answer', 'D: Idea'], correct: '🇧' }
+  ],
+  B2: [
+    { word: 'Abschluss', meaning: 'Conclusion', options: ['A: Start', 'B: Conclusion', 'C: Beginning', 'D: Outcome'], correct: '🇧' },
+  { word: 'Anforderung', meaning: 'Requirement', options: ['A: Suggestion', 'B: Demand', 'C: Requirement', 'D: Request'], correct: '🇩' }
+  ],
+  C1: [
+  ],
+  C2: [
+  ]
+  };
+// Word of the Day data
+const wordList = [
+  { word: 'die Stadt', meaning: 'City', plural: 'die Städte', indefinite: 'eine Stadt', definite: 'die Stadt' },
+  { word: 'der Apfel', meaning: 'An Apple', plural: 'die Äpfel', indefinite: 'ein Apfel', definite: 'der Apfel' }
+]; 
 
 // Shuffle array
 const shuffleArray = (array) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-};
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}; 
 
-// Quiz management variables
-let quizInProgress = false;
+// Level selection and quiz function
+let quizInProgress = false; 
 
 // Function to send a quiz message
-const sendQuizMessage = async (channel, question, options) => {
-  const embed = new EmbedBuilder()
-    .setTitle('**Russian Vocabulary Quiz**')
-    .setDescription(question)
-    .addFields(options.map((opt) => ({ name: opt, value: '\u200B', inline: true })))
-    .setColor('#0099ff')
-    .setFooter({ text: 'React with the emoji corresponding to your answer' });
+const sendQuizMessage = async (channel, user, question, options) => {
+  const embed = new EmbedBuilder()
+    .setTitle('**German Vocabulary Quiz**')
+    .setDescription(question)
+    .addFields(options.map((opt) => ({ name: opt, value: '\u200B', inline: true })))
+    .setColor('#E67E22')
+    .setFooter({ text: 'React with the emoji corresponding to your answer' }); 
 
-  const quizMessage = await channel.send({ embeds: [embed] });
+  const quizMessage = await channel.send({ embeds: [embed] }); 
 
-  for (const option of ['🇦', '🇧', '🇨', '🇩']) {
-    await quizMessage.react(option);
-  }
+  for (const option of ['🇦', '🇧', '🇨', '🇩']) {
+    await quizMessage.react(option);
+  } 
 
-  return quizMessage;
-};
+  return quizMessage;
+}; 
 
-// Event listener when the bot is ready
-client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
-});
-
-// Event listener for messages
+// Message event listener
 client.on('messageCreate', async (message) => {
-  if (message.content.toLowerCase() === '!start') {
-    if (quizInProgress) {
-      return message.reply('A quiz is already in progress. Please wait until it finishes.');
-    }
+  if (message.content.toLowerCase() === '!start') {
+    if (quizInProgress) {
+      return message.reply('A quiz is already in progress. Please wait.');
+    } 
 
-    quizInProgress = true;
+    quizInProgress = true;
+    const levelEmbed = new EmbedBuilder()
+      .setTitle('Choose Your Level')
+      .setDescription('React to select your level:\n\n🇦: A1\n🇧: A2\n🇨: B1\n🇩: B2\n🇪: C1\n🇫: C2')
+      .setColor('#3498DB'); 
 
-    shuffleArray(words); // Shuffle questions
-    const selectedWords = words.slice(0, 5); // Select 5 random words
-    let score = 0;
-    let detailedResults = [];
+    const levelMessage = await message.channel.send({ embeds: [levelEmbed] }); 
 
-    for (let i = 0; i < selectedWords.length; i++) {
-      const currentWord = selectedWords[i];
-      const question = `What is the English meaning of the Russian word "${currentWord.word}"?`;
+    const levelEmojis = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫'];
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']; 
 
-      const quizMessage = await sendQuizMessage(message.channel, question, currentWord.options);
+    await Promise.all(levelEmojis.map((emoji) => levelMessage.react(emoji))); 
 
-      const filter = (reaction, user) =>
-        ['🇦', '🇧', '🇨', '🇩'].includes(reaction.emoji.name) && !user.bot;
+    const filter = (reaction, user) => levelEmojis.includes(reaction.emoji.name) && user.id === message.author.id; 
 
-      try {
-        const collected = await quizMessage.awaitReactions({ filter, max: 1, time: 15000 });
-        const reaction = collected.first();
+    try {
+      const collected = await levelMessage.awaitReactions({ filter, max: 1, time: 15000 });
+      const reaction = collected.first(); 
 
-        if (reaction) {
-          const userChoiceIndex = ['🇦', '🇧', '🇨', '🇩'].indexOf(reaction.emoji.name);
-          const userAnswer = currentWord.options[userChoiceIndex].split(': ')[1]; // Extract answer
-          const isCorrect = userAnswer === currentWord.meaning;
+      if (!reaction) {
+        quizInProgress = false;
+        await levelMessage.delete();
+        return message.channel.send('No level selected. Quiz cancelled.');
+      } 
 
-          if (isCorrect) {
-            score++;
-          }
+      const selectedLevel = levels[levelEmojis.indexOf(reaction.emoji.name)];
+let userLevel = selectedLevel; // Store the user's level
+      await levelMessage.delete(); 
 
-          detailedResults.push({
-            word: currentWord.word,
-            userAnswer: userAnswer,
-            correct: currentWord.meaning,
-            isCorrect: isCorrect
-          });
-        } else {
-          detailedResults.push({
-            word: currentWord.word,
-            userAnswer: 'No reaction',
-            correct: currentWord.meaning,
-            isCorrect: false
-          });
-        }
-      } catch (error) {
-        console.error('Reaction collection failed:', error);
-        detailedResults.push({
-          word: currentWord.word,
-          userAnswer: 'No reaction',
-          correct: currentWord.meaning,
-          isCorrect: false
-        });
-      }
+      const questions = quizData[selectedLevel] || [];
+      shuffleArray(questions); 
 
-      await quizMessage.delete();
-    }
+      // Select only 5 questions from the shuffled array (or as many as available)
+      const questionsToAsk = questions.slice(0, 5); 
 
-    quizInProgress = false;
+      if (questionsToAsk.length === 0) {
+        quizInProgress = false;
+        return message.channel.send('No questions available for this level.');
+      } 
 
-    const resultEmbed = new EmbedBuilder()
-      .setTitle('Quiz Results')
-      .setDescription(`You scored ${score} out of 5!`)
-      .setColor('#00FF00');
+      let score = 0;
+      const detailedResults = []; 
 
-    let resultsDetail = '';
+      for (const question of questionsToAsk) {
+        const quizMessage = await sendQuizMessage(
+          message.channel,
+          message.author,
+          `What is the English meaning of "${question.word}"?`,
+          question.options
+        ); 
 
-    detailedResults.forEach((result) => {
-      resultsDetail += `**Russian word:** "${result.word}"\n` +
-        `Your answer: ${result.userAnswer}\n` +
-        `Correct answer: ${result.correct}\n` +
-        `Result: ${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}\n\n`;
-    });
+        const quizFilter = (reaction, user) =>
+          ['🇦', '🇧', '🇨', '🇩'].includes(reaction.emoji.name) && user.id === message.author.id; 
 
-    resultEmbed.addFields({ name: 'Detailed Results', value: resultsDetail });
+        try {
+          const quizCollected = await quizMessage.awaitReactions({ filter: quizFilter, max: 1, time: 15000 });
+          const quizReaction = quizCollected.first(); 
 
-    await message.channel.send({ embeds: [resultEmbed] });
-  }
-});
+          if (quizReaction && quizReaction.emoji.name === question.correct) {
+            score++;
+            detailedResults.push({
+              word: question.word,
+              userAnswer: question.options[['🇦', '🇧', '🇨', '🇩'].indexOf(quizReaction.emoji.name)].split(': ')[1],
+              correct: question.meaning,
+              isCorrect: true,
+            });
+          } else {
+            detailedResults.push({
+              word: question.word,
+              userAnswer: quizReaction
+                ? question.options[['🇦', '🇧', '🇨', '🇩'].indexOf(quizReaction.emoji.name)].split(': ')[1]
+                : 'No Answer',
+              correct: question.meaning,
+              isCorrect: false,
+            });
+          }
+        } catch (error) {
+          console.error('Reaction collection failed:', error);
+          detailedResults.push({
+            word: question.word,
+            userAnswer: 'No Answer',
+            correct: question.meaning,
+            isCorrect: false,
+          });
+        } finally {
+          await quizMessage.delete();
+        }
+      } 
 
-// Channel ID for Word of the Day
-const wordOfTheDayChannelId = '1303664003444379649';
+       const resultEmbed = new EmbedBuilder()
+  .setTitle('Quiz Results')
+  .setDescription(
+    `**Level:** ${userLevel}\nYou scored ${score} out of ${questionsToAsk.length}!`
+  )
+  .setColor('E67E22')
+  .addFields(
+    {
+      name: 'Detailed Results',
+      value: detailedResults
+        .map(
+          (res) =>
+            `**Word:** ${res.word}\nYour Answer: ${res.userAnswer}\nCorrect: ${res.correct}\nResult: ${
+              res.isCorrect ? '✅' : '❌'
+            }`
+        )
+        .join('\n\n'),
+    }
+  ); 
 
-// Function to send the Word of the Day
+      await message.channel.send({ embeds: [resultEmbed] });
+    } catch (error) {
+      console.error('Error during level selection:', error);
+    } finally {
+      quizInProgress = false;
+    }
+  }
+}); 
+
+// Word of the Day
+const wordOfTheDayChannelId = '1327875414584201350';
 const sendWordOfTheDay = async () => {
-  const channel = await client.channels.fetch(wordOfTheDayChannelId);
-  const randomWord = words[Math.floor(Math.random() * words.length)];
-  const embed = new EmbedBuilder()
-    .setTitle('**Word of the Day**')
-    .setDescription(`Today's Russian word is **${randomWord.word}**!`)
-    .addFields(
-      { name: 'Meaning', value: randomWord.meaning }
-    )
-    .setColor('#7907ff') // Purple color
-    .setFooter({ text: 'Stay tuned for more words!' });
+  const channel = await client.channels.fetch(wordOfTheDayChannelId);
+  const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
+  const embed = new EmbedBuilder()
+    .setTitle('**Word of the Day**') // Bold title
+    .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`) // Normal sentence, bold word
+    .addFields(
+      { name: '**Meaning**', value: randomWord.meaning, inline: false },
+      { name: '**Plural**', value: randomWord.plural, inline: false },
+      { name: '**Indefinite Article**', value: randomWord.indefinite, inline: false },
+      { name: '**Definite Article**', value: randomWord.definite, inline: false }
+    )
+    .setColor('#E67E22'); 
 
-  await channel.send({ embeds: [embed] });
-};
+  await channel.send({ embeds: [embed] });
+}; 
 
-// Set up cron job to send Word of the Day at 12:30 PM IST daily
-cron.schedule('30 12 * * *', () => {
-  sendWordOfTheDay();
-}, {
-  scheduled: true,
-  timezone: "Asia/Kolkata"
-});
+cron.schedule(
+  '26 11 * * *',
+  () => {
+    sendWordOfTheDay();
+  },
+  {
+    scheduled: true,
+    timezone: 'Asia/Kolkata',
+  }
+); 
 
-// Log in to Discord with the bot token
+client.once('ready', () => {
+  console.log(`${client.user.tag} is online!`);
+}); 
+
 client.login(TOKEN);
