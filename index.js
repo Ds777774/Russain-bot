@@ -597,24 +597,32 @@ const wordList = [
   },
   // Add more word objects here
 ];
-
 // Word of the Day
 const wordOfTheDayChannelId = '1327875414584201350';
 
 const sendWordOfTheDay = async () => {
   try {
     const channel = await client.channels.fetch(wordOfTheDayChannelId);
-    const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
 
-    // Check if all necessary properties exist
-    if (!randomWord.word || !randomWord.meaning || !randomWord.plural || !randomWord.indefinite || !randomWord.definite) {
-      console.error('Missing properties in word of the day object.');
+    // Ensure the channel exists
+    if (!channel) {
+      console.error('Word of the Day channel not found.');
       return;
     }
 
+    // Pick a random word
+    const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
+
+    // Validate randomWord structure
+    if (!randomWord.word || !randomWord.meaning || !randomWord.plural || !randomWord.indefinite || !randomWord.definite) {
+      console.error('Random word is missing required properties.');
+      return;
+    }
+
+    // Create an embed for the word
     const embed = new EmbedBuilder()
-      .setTitle('**Word of the Day**') // Bold title
-      .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`) // Normal sentence, bold word
+      .setTitle('**Word of the Day**')
+      .setDescription(`Today's Word of the Day is...\n\n**${randomWord.word}**`)
       .addFields(
         { name: '**Meaning**', value: randomWord.meaning, inline: false },
         { name: '**Plural**', value: randomWord.plural, inline: false },
@@ -623,15 +631,19 @@ const sendWordOfTheDay = async () => {
       )
       .setColor('#E67E22');
 
+    // Send the embed
     await channel.send({ embeds: [embed] });
+    console.log('Word of the Day sent successfully!');
   } catch (error) {
-    console.error('Error sending word of the day:', error);
+    console.error('Error sending Word of the Day:', error.message);
   }
 };
 
+// Schedule Word of the Day at 12:48 IST
 cron.schedule(
-  '48 12 * * *', // Set to 12:48 IST
+  '48 12 * * *',
   () => {
+    console.log('Running Word of the Day cron job...');
     sendWordOfTheDay();
   },
   {
@@ -640,8 +652,19 @@ cron.schedule(
   }
 );
 
+// Bot ready event
 client.once('ready', () => {
   console.log(`${client.user.tag} is online!`);
 });
 
-client.login(TOKEN);
+// Log in to Discord using the bot token
+const TOKEN = process.env.TOKEN; // Use environment variable for security
+if (!TOKEN) {
+  console.error('Bot token not found. Please set the TOKEN environment variable.');
+  process.exit(1); // Exit with status 1 if token is missing
+}
+
+client.login(TOKEN).catch((error) => {
+  console.error('Failed to log in:', error.message);
+  process.exit(1); // Exit with status 1 if login fails
+});
