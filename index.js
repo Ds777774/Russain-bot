@@ -471,20 +471,24 @@ const sendQuizMessage = async (channel, user, question, options) => {
 };
 
 client.on('messageCreate', async (message) => {
-  if (message.content.toLowerCase() === '!help') {
-    const helpEmbed = new EmbedBuilder()
-      .setTitle('Help Menu')
-      .setDescription('Here are the available commands for this bot:')
-      .setColor('#7907FF')
-      .addFields(
-        { name: '!start', value: 'Start a quiz. Select your level and answer questions to test your vocabulary.' },
-        { name: '!help', value: 'Show this help menu with all available commands.' },
-        { name: '!word', value: 'Get the Word of the Day with its meaning, plural, and articles.' }
-      )
-      .setFooter({ text: 'Happy learning!' });
+if (message.content.toLowerCase() === '!help') {
+  const helpEmbed = new EmbedBuilder()
+    .setTitle('Quiz Rules')
+    .setDescription(
+      'Here are the rules for the Russian Vocabulary Quiz:\n\n' +
+      '1. Use **!start** to begin the quiz.\n' +
+      '2. Select your level by reacting to the options:\n   🇦: A1, 🇧: A2, 🇨: B1, 🇩: B2, 🇪: C1, 🇫: C2.\n' +
+      '3. The bot will ask **5 questions** from the selected level.\n' +
+      '4. Each question has **4 options (A, B, C, D)**.\n' +
+      '5. You have **1 minute** to answer each question.\n' +
+      '6. Your final result will include your score, correct answers, and your level.'
+    )
+    .setColor('#7907FF')
+    .setFooter({ text: 'Type !start to begin the quiz. Good luck!' });
 
-    await message.channel.send({ embeds: [helpEmbed] });
-  }
+  await message.channel.send({ embeds: [helpEmbed] });
+  return; // Stop further execution for this command
+}
 
   if (message.content.toLowerCase() === '!start') {
     if (quizInProgress) {
